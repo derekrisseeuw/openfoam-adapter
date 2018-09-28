@@ -1,8 +1,8 @@
-#include "Force.H"
+#include "Stress.H"
 
 using namespace Foam;
 
-preciceAdapter::FSI::Force::Force
+preciceAdapter::FSI::Stress::Stress
 (
     const Foam::fvMesh& mesh,
     const fileName& timeName
@@ -17,11 +17,11 @@ mesh_(mesh)
     dataType_ = vector;
 
     // TODO: Is this ok?
-    Force_ = new volVectorField
+    Stress_ = new volVectorField
     (
         IOobject
         (
-            "Force",
+            "Stress",
             timeName,
             mesh,
             IOobject::NO_READ,
@@ -37,10 +37,10 @@ mesh_(mesh)
     );
 }
 
-Foam::tmp<Foam::volSymmTensorField> preciceAdapter::FSI::Force::devRhoReff(dimensionedScalar rho) const
+Foam::tmp<Foam::volSymmTensorField> preciceAdapter::FSI::Stress::devRhoReff(dimensionedScalar rho) const
 {
     // TODO: Only works for laminar flows at the moment.
-    // See the OpenFOAM Forces function object, where an extended
+    // See the OpenFOAM Stresss function object, where an extended
     // version of this method is being used.
 
     // Get the kinematic viscosity from the transportProperties
@@ -60,14 +60,14 @@ Foam::tmp<Foam::volSymmTensorField> preciceAdapter::FSI::Force::devRhoReff(dimen
 
 }
 
-void preciceAdapter::FSI::Force::write(double * buffer)
+void preciceAdapter::FSI::Stress::write(double * buffer)
 {
     /* TODO: Implement
     * We need two nested for-loops for each patch,
     * the outer for the locations and the inner for the dimensions.
     * See the preCICE writeBlockVectorData() implementation.
     */
-    // Compute forces. See the Forces function object.
+    // Compute stress. See the Stresss function object.
     // Normal vectors on the boundary, multiplied with the face areas
     // const surfaceVectorField::Boundary& nf (
     //     mesh_.Sf().boundaryField() / mesh_.magSf().boundaryField()
@@ -95,46 +95,46 @@ void preciceAdapter::FSI::Force::write(double * buffer)
 
     int bufferIndex = 0;
 
-    // Info<<  Force_->boundaryFieldRef()[patchIDs_[0]]<< endl;
+    // Info<<  Stress_->boundaryFieldRef()[patchIDs_[0]]<< endl;
     
     // For every boundary patch of the interface
     for (uint j = 0; j < patchIDs_.size(); j++)
     {
         int patchID = patchIDs_.at(j);
 
-        // Pressure forces
+        // Pressure stresses
         // TODO: Extend to cover also compressible solvers
-        Force_->boundaryFieldRef()[patchID] =
+        Stress_->boundaryFieldRef()[patchID] =
             nbf[patchID] * p.boundaryField()[patchID]* rho.value();
 
-        // Viscous forces
-        Force_->boundaryFieldRef()[patchID] +=
+        // Viscous stresses
+        Stress_->boundaryFieldRef()[patchID] +=
             nbf[patchID] & devRhoReffb[patchID];
 
-        // Write the forces to the preCICE buffer
+        // Write the stress to the preCICE buffer
         // For every cell of the patch
-        forAll(Force_->boundaryFieldRef()[patchID], i)
+        forAll(Stress_->boundaryFieldRef()[patchID], i)
         {
-            // Copy the force into the buffer
+            // Copy the stress into the buffer
             // x-dimension
             buffer[bufferIndex++]
             =
-            Force_->boundaryFieldRef()[patchID][i].x();
+            Stress_->boundaryFieldRef()[patchID][i].x();
 
             // y-dimension
             buffer[bufferIndex++]
             =
-            Force_->boundaryFieldRef()[patchID][i].y();
+            Stress_->boundaryFieldRef()[patchID][i].y();
 
             // z-dimension
             buffer[bufferIndex++]
             =
-            Force_->boundaryFieldRef()[patchID][i].z();
+            Stress_->boundaryFieldRef()[patchID][i].z();
         }
     }
 }
 
-void preciceAdapter::FSI::Force::read(double * buffer)
+void preciceAdapter::FSI::Stress::read(double * buffer)
 {
     /* TODO: Implement
     * We need two nested for-loops for each patch,
@@ -142,12 +142,12 @@ void preciceAdapter::FSI::Force::read(double * buffer)
     * See the preCICE readBlockVectorData() implementation.
     */
     FatalErrorInFunction
-        << "Reading forces is not supported."
+        << "Reading stresses is not supported."
         << exit(FatalError);
 }
 
-preciceAdapter::FSI::Force::~Force()
+preciceAdapter::FSI::Stress::~Stress()
 {
     // TODO: Is this enough?
-    delete Force_;
+    delete Stress_;
 }
