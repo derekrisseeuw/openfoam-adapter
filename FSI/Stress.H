@@ -1,5 +1,5 @@
-#ifndef FSI_FORCE_H
-#define FSI_FORCE_H
+#ifndef FSI_STRESS_H
+#define FSI_STRESS_H
 
 #include "CouplingDataUser.H"
 

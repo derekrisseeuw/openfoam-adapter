@@ -75,6 +75,16 @@ void preciceAdapter::FSI::FluidStructureInteraction::addWriters(std::string data
         );
         DEBUG(adapterInfo("Added writer: Force."));
     }
+    else if (dataName.find("Stress") == 0)
+    {
+        interface->addCouplingDataWriter
+        (
+            dataName,
+            new Stress(mesh_, runTime_.timeName()) /* TODO: Add any other arguments here */
+        );
+        DEBUG(adapterInfo("Added writer: Stress."));
+    }
+
     // TODO Do we need to include the displacement and velocity? They will never be written...  
     else if (dataName.find("Displacement") == 0)
     {
@@ -85,7 +95,7 @@ void preciceAdapter::FSI::FluidStructureInteraction::addWriters(std::string data
         );
         DEBUG(adapterInfo("Added writer: Displacement."));
     }
-    // TODO perform a similar strategy here as in the 
+    // TODO perform a similar strategy here as in the CHT file
     else if (dataName.find("Velocity") == 0)
     {
         interface->addCouplingDataWriter
@@ -122,6 +132,17 @@ void preciceAdapter::FSI::FluidStructureInteraction::addReaders(std::string data
         );
         DEBUG(adapterInfo("Added reader: Force."));
     }
+        // TODO do we need to include the stress here, since it will not be read by openFOAM?
+    else if (dataName.find("Stress") == 0)
+    {
+        interface->addCouplingDataReader
+        (
+            dataName,
+            new Stress(mesh_, runTime_.timeName()) /* TODO: Add any other arguments here */
+        );
+        DEBUG(adapterInfo("Added reader: Stress."));
+    }
+
     else if (dataName.find("Displacement") == 0)
     {
         interface->addCouplingDataReader

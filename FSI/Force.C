@@ -57,7 +57,6 @@ Foam::tmp<Foam::volSymmTensorField> preciceAdapter::FSI::Force::devRhoReff(dimen
     const volVectorField& U = mesh_.lookupObject<volVectorField>("U");
 
     return -rho * nu * dev(twoSymm(fvc::grad(U)));
-
 }
 
 void preciceAdapter::FSI::Force::write(double * buffer)
@@ -69,15 +68,10 @@ void preciceAdapter::FSI::Force::write(double * buffer)
     */
     // Compute forces. See the Forces function object.
     // Normal vectors on the boundary, multiplied with the face areas
-    // const surfaceVectorField::Boundary& nf (
-    //     mesh_.Sf().boundaryField() / mesh_.magSf().boundaryField()
-    //     );
+    const surfaceVectorField::Boundary& Sfb =
+        mesh_.Sf().boundaryField();
 
-    const surfaceVectorField nf(
-            mesh_.Sf() / mesh_.magSf()
-            );
-    const surfaceVectorField::Boundary& nbf = nf.boundaryField();
-
+    // Density
     // TODO: Extend to cover also compressible solvers
     dimensionedScalar rho = mesh_.lookupObject<IOdictionary>("transportProperties").lookup("rho");
 
@@ -105,11 +99,11 @@ void preciceAdapter::FSI::Force::write(double * buffer)
         // Pressure forces
         // TODO: Extend to cover also compressible solvers
         Force_->boundaryFieldRef()[patchID] =
-            nbf[patchID] * p.boundaryField()[patchID]* rho.value();
+            Sfb[patchID] * p.boundaryField()[patchID]* rho.value();
 
         // Viscous forces
         Force_->boundaryFieldRef()[patchID] +=
-            nbf[patchID] & devRhoReffb[patchID];
+            Sfb[patchID] & devRhoReffb[patchID];
 
         // Write the forces to the preCICE buffer
         // For every cell of the patch
