@@ -103,11 +103,12 @@ void preciceAdapter::FSI::Stress::write(double * buffer)
         int patchID = patchIDs_.at(j);
 
         // Pressure stresses
-        // TODO: Extend to cover also compressible solvers
+        // TODO: Extend to cover also compressible solvers. Multiply by the normal vector to transform 
+        // scalar into a vector
         Stress_->boundaryFieldRef()[patchID] =
             nbf[patchID] * p.boundaryField()[patchID]* rho.value();
 
-        // Viscous stresses
+        // Viscous stresses. Rank 2 tensor to a vector by the inner product. 
         Stress_->boundaryFieldRef()[patchID] +=
             nbf[patchID] & devRhoReffb[patchID];
 
