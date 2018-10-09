@@ -68,6 +68,7 @@ Foam::functionObjects::preciceAdapterFunctionObject::~preciceAdapterFunctionObje
 
 bool Foam::functionObjects::preciceAdapterFunctionObject::read(const dictionary& dict)
 {
+    UPstream::initNull(); // add this line
     adapter_.configure();
 
     return true;
