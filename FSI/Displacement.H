@@ -52,6 +52,6 @@ public:
 }
 }
 // Velocity must be updated after the displacment.
-// #include "Velocity.H"
+#include "Velocity.H"
 
 #endif

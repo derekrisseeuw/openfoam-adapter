@@ -6,10 +6,11 @@
 #include "fvCFD.H"
 #include "primitivePatchInterpolation.H"
 
+// #include "fixedValuePointPatchFields.H"
+#include "fixedValueFvPatchFields.H"
+#include "primitiveMesh.H"
 #include "fixedValuePointPatchFields.H"
-#include "fvPatchFields.H"
-#include "fixedValueFvPatchFields.H"
-#include "fixedValueFvPatchFields.H"
+// #include "fvPatchFields.H"
 
 // #include "Displacement.H"
 
@@ -19,9 +20,10 @@ namespace FSI
 {
 
 //- Class that writes and reads Velocity
-class Velocity : public CouplingDataUser
+class Velocity 
+:
+    public CouplingDataUser //fixedValueFvPatchVectorField
 {
-
 private:
 
     /* TODO: We probably need to declare some fields here,
@@ -33,14 +35,10 @@ private:
 
     // Get the runTime
     const Foam::Time& runTime_;
-    
-    // set up te displacement at the faces.
-    Foam::volVectorField * faceDisplacement_;
-    Foam::volVectorField * faceDisplacementOld_;
 
     // object to save the times of faceDisplacement
-    Foam::scalar time_;
-    Foam::scalar timeOld_;
+    // Foam::scalar time_;
+    // Foam::scalar timeOld_;
 
     // Velocity volVectorField
     Foam::volVectorField * velocity_;
@@ -68,7 +66,7 @@ public:
 
     // TODO. needs destructor?
     // virtual or nothing in front
-    virtual ~Velocity();
+    // virtual ~Velocity();
 
 };
 
