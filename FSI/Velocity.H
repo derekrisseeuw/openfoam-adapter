@@ -5,7 +5,7 @@
 
 #include "fvCFD.H"
 #include "primitivePatchInterpolation.H"
-
+#include "faceList.H"
 // #include "fixedValuePointPatchFields.H"
 #include "fixedValueFvPatchFields.H"
 #include "primitiveMesh.H"
@@ -42,6 +42,11 @@ private:
 
     // Velocity volVectorField
     Foam::volVectorField * velocity_;
+
+    Foam::tmp<Foam::scalarField> sweptVols(
+    const pointField& newPoints,
+    const pointField& oldPoints,
+    const faceList& f);
 
 public:
 

@@ -73,6 +73,32 @@ velocity_(
     // );
 }
 
+Foam::tmp<Foam::scalarField> preciceAdapter::FSI::Velocity::sweptVols
+(
+    const pointField& newPoints,
+    const pointField& oldPoints,
+    const faceList& f
+)
+{
+
+    // Create swept volumes
+    // const faceList& f = faces();
+
+    tmp<scalarField> tsweptVols(new scalarField(f.size()));
+    scalarField& sweptVols = tsweptVols.ref();
+
+    forAll(f, facei)
+    {
+        sweptVols[facei] = f[facei].sweptVol(oldPoints, newPoints);
+    }
+
+    // Force recalculation of all geometric data with new points
+    // clearGeom();
+
+    return tsweptVols;
+}
+
+
 void preciceAdapter::FSI::Velocity::write(double * buffer)
 {
     /* TODO: Implement
@@ -108,12 +134,9 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
     // }
 
 
-    // const fvMesh& mesh = internalField().mesh();
-
     if (mesh_.moving())
     {
         // Normal vectors on the boundary, multiplied with the face areas
-
         const surfaceVectorField nf(
         mesh_.Sf() / mesh_.magSf()
         );
@@ -167,20 +190,38 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
             const pointVectorField& pointDisplacement_ =
                 mesh_.lookupObject<pointVectorField>("pointDisplacement");
 
-            fixedValuePointPatchVectorField& pointDisplacementFluidPatch =
-                refCast<fixedValuePointPatchVectorField>
-                (
-                    pointDisplacement_->boundaryFieldRef()[patchID]
-                );
+            // const pointField&  newpoints = mesh_.points().oldTime().boundaryMesh()[patchID]
+            // fixedValuePointPatchVectorField& pointDisplacementFluidPatch =
+            //     refCast<fixedValuePointPatchVectorField>
+            //     (
+            //         pointDisplacement_->boundaryFieldRef()[patchID]
+            //     );
             
-            // Info << nl << "old value: " << max(pointDisplacement_.oldTime().primitiveField()) << endl;
-            
-            tmp<scalarField> sweptVols = primitiveMesh::movePoints(
-                    pointDisplacementFluidPatch,
-                    pointDisplacementFluidPatch.oldTime()
-                );
+            //COMPARE
+            // const vector Uw1 = U_.boundaryField()[patchi][patchFacei];
+            // const vector& Uw0 =  U_.oldTime().boundaryField()[patchi][patchFacei];
 
-            Info << "sweptVols" << sweptVols << endl;
+            // Info << nl << "old value: " << max(pointDisplacement_.oldTime().primitiveField()) << endl;
+            // const scalarField TpOld(T.oldTime().boundaryField()[patch().index()]);
+            // Info << "Pointfield:  " << pointDisplacement_.boundaryField()[patchID].patchInternalField() << endl;
+            const pointField& newpoints = pointDisplacement_.boundaryField()[patchID].patchInternalField();
+            const pointField& oldpoints = pointDisplacement_.oldTime().boundaryField()[patchID].patchInternalField();
+            const faceList& f = pp.localFaces();
+            //GET THIS PART WORKING
+            // tmp<scalarField> sweptVols = primitiveMesh::movePoints
+            // (
+            //     pointDisplacement_.boundaryFieldRef()[patchID].patchInternalField(),
+            //     pointDisplacement_.oldTime().boundaryFieldRef()[patchID].patchInternalField()
+            // );
+
+            tmp<scalarField> tsweptVols = sweptVols
+            (
+                newpoints,
+                oldpoints,
+                f
+            );
+
+            Info << "sweptVols" << tsweptVols << endl;
 
 
 // -------------------------------------------------------
@@ -250,9 +291,9 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
             // velocityBf[patchID] = 
             //     (Up + n*(Un - (n & Up)));
 
-            velocityPatch = (Up + n*(Un - (n & Up)));
+            // velocityPatch = (Up + n*(Un - (n & Up)));
 
-            Info << "velocity on boundary: " << velocityPatch << endl;
+            // Info << "velocity on boundary: " << velocityPatch << endl;
         }
 
         // fixedValueFvPatchVectorField::updateCoeffs();
