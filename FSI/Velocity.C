@@ -28,6 +28,7 @@ velocity_(
     dataType_ = vector;
     // oldpoints = new pointField();
     // CREATE COPY OF THE POINTDISPLACEMENT FIELD?
+    // Compare with fvMotionSolver/fvMotionSolvers/displacement/solidBodyDisplacementLaplacian/solidBodyDisplacementLaplacianFvMotionSolver.C
     oldPointDisplacement_ = new pointVectorField
     (
         IOobject
