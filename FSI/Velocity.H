@@ -37,11 +37,14 @@ private:
     const Foam::Time& runTime_;
 
     // object to save the times of faceDisplacement
-    // Foam::scalar time_;
+    Foam::scalar time_;
     // Foam::scalar timeOld_;
 
     // Velocity volVectorField
     Foam::volVectorField * velocity_;
+
+    Foam::pointVectorField *oldPointDisplacement_;
+    // const pointField& oldPoints;
 
     Foam::tmp<Foam::scalarField> sweptVols(
     const pointField& newPoints,

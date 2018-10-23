@@ -1295,18 +1295,18 @@ void preciceAdapter::Adapter::readCheckpoint()
     // Reload all the fields of type pointVectorField
     for (uint i = 0; i < pointVectorFields_.size(); i++)
     {
-        try{
-            if ("pointDisplacement" != pointVectorFields_.at(i)->name())
-            {
-                *(pointVectorFields_.at(i)) == *(pointVectorFieldCopies_.at(i));
-            }
-            // TODO: Known bug: cannot find "volScalarField::Internal kEpsilon:G"
-            // Currently it is skipped. Before it was not corrected at all.
-            // A warning for this is thrown when adding epsilon to the checkpoint.
-        } catch (Foam::error) {
-            DEBUG(adapterInfo("Do not update the pointDisplacement field" + pointVectorFields_.at(i)->name(), "warning"));
-        }
-        // *(pointVectorFields_.at(i)) == *(pointVectorFieldCopies_.at(i));
+        // TODO: The pointDisplacment may be required to be updated, so exclude it from checkpointing
+        // However, this is a bit hacky. It would be better to write the displacement classes such that 
+        // they can work with a checkpointed property. 
+        // try{
+        //     if ("pointDisplacement" != pointVectorFields_.at(i)->name())
+        //     {
+        //         *(pointVectorFields_.at(i)) == *(pointVectorFieldCopies_.at(i));
+        //     }
+        // } catch (Foam::error) {
+        //     DEBUG(adapterInfo("Do not update the pointDisplacement field" + pointVectorFields_.at(i)->name(), "warning"));
+        // }
+        *(pointVectorFields_.at(i)) == *(pointVectorFieldCopies_.at(i));
     }
 
     // NOTE: Add here other field types to read, if needed.
