@@ -129,14 +129,33 @@ Foam::tmp<Foam::scalarField> preciceAdapter::FSI::Velocity::sweptVols
 
     // Create swept volumes
     // const faceList& f = faces();
-
     tmp<scalarField> tsweptVols(new scalarField(f.size()));
     scalarField& sweptVols = tsweptVols.ref();
     
     forAll(f, facei)
     {
-        sweptVols[facei] = f[facei].sweptVol(oldPoints, newPoints);
+        // sweptVols[facei] = f[facei].sweptVol(oldPoints, newPoints);
         // Info << "swept volume for patch " << i << " " << sweptVols[facei] << endl;
+
+        const face& fb = f[facei];
+
+        pointField points(4);
+        pointField opoints(4);
+
+        forAll(fb, fp)
+        {
+            if (fb[fp] < 0 && fb[fp] >= newPoints.size())
+            {
+                FatalErrorInFunction
+                    << "Problem." << abort(FatalError);
+            }
+            points[fp] = newPoints[fb[fp]];
+            opoints[fp] = newPoints[fb[fp]];
+            Info << "what is this " << newPoints[fb[fp]]  << endl;
+        }
+        // sweptVols[facei] = f[facei].sweptVol(points, opoints);
+
+        Info << endl;
     }
     // Force recalculation of all geometric data with new points
     // clearGeom();
@@ -200,8 +219,8 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
             // const pointField& oldpoints = pointDisplacement_.oldTime().boundaryField()[patchID].patchInternalField();
             
             // THIS IS A POINTER?
-            const pointVectorField& oldoldPointDisplacement_ = pointDisplacement_.oldTime().oldTime();
-            const pointVectorField& oldPointDisplacement_ = pointDisplacement_.oldTime();
+            // const pointVectorField& oldoldPointDisplacement_ = pointDisplacement_.oldTime().oldTime();
+            // const pointVectorField& oldPointDisplacement_ = pointDisplacement_.oldTime();
 
         }      
 
@@ -217,6 +236,8 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
         const polyPatch& pp = p.patch();
         // const polyPatch& pp = mesh_.boundaryMesh()[patchID];
         const pointField& oldPoints = mesh_.oldPoints();
+        const pointField& newPoints = mesh_.points();
+            
     
 
         const pointField& newpoints2 = pp.localPoints();
@@ -261,8 +282,8 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
 
         // DONT DEFINE AS POINTER BUT RATHER AS REAL VALUE
 
-        const pointField newpoints = pointDisplacement_.boundaryField()[patchID].patchInternalField();
-        const pointField oldpoints = pointDisplacement_.oldTime().boundaryField()[patchID].patchInternalField();
+        const pointField newpoints = pointDisplacement_.primitiveField();
+        const pointField oldpoints = pointDisplacement_.oldTime().primitiveField();
         
         const faceList& f = pp.localFaces();
 
@@ -273,12 +294,8 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
         //     pointDisplacement_.oldTime().boundaryField()[patchID].patchInternalField() - oldpoints 
         //     << nl << endl;
         
-        // Info << "displac at old value3: " <<  
-        //     newpoints - oldpoints 
-        //     << nl << endl;
 
         // Info << "displac at new old value4: " << newpoints[15] << endl;
-        // Info << "velocity at new old value: " << velocity_->internalField()[15] << endl;
 
 
         tmp<scalarField> tsweptVols = sweptVols
@@ -287,6 +304,9 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
             oldpoints,
             f
         );
+
+        // Info << "old Point " << oldpoints[15] << endl;
+        // Info << "new Point " << newpoints[15] << endl;
 
 
         // Info << "sweptVols" << tsweptVols << endl;
@@ -331,7 +351,11 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
         // tmp<scalarField> Un = phip/(magSfb + VSMALL);
         const vectorField n(p.nf());
         const scalarField& magSf = p.magSf();
-        tmp<scalarField> Un = phip/(magSf + VSMALL);
+        // tmp<scalarField> Un = phip/(magSf + VSMALL);
+
+        // tmp<vectorField> Un = n*tsweptVols/(magSf*runTime_.deltaTValue());
+
+        // Info << "normal velocity " << Un << endl;
 
         // volVectorField::Boundary& Ubf = U.boundaryFieldRef();
 

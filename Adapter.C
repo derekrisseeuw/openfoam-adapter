@@ -752,13 +752,17 @@ void preciceAdapter::Adapter::storeMeshPoints()
     DEBUG(adapterInfo("Storing mesh points..."));
     // TODO: In foam-extend, we would need "allPoints()". Check if this gives the same data.
     meshPoints_ = mesh_.points();
+    oldMeshPoints_ = mesh_.oldPoints();
     DEBUG(adapterInfo("Stored mesh points."));
 }
 
 void preciceAdapter::Adapter::reloadMeshPoints()
 {
+    // In Foam::polyMesh::movePoints.
+    // TODO: This function overwrites the pointer to the old mesh. Therefore, if you revert the mesh, the oldpointer will be set to the points, which are the new values. 
     DEBUG(adapterInfo("Moving mesh points to their previous locations..."));
     const_cast<fvMesh&>(mesh_).movePoints(meshPoints_);
+    const_cast<pointField&>(mesh_.oldPoints()) = oldMeshPoints_;
     DEBUG(adapterInfo("Moved mesh points to their previous locations."));
 }
 
