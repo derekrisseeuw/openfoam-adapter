@@ -43,7 +43,8 @@ private:
     // Velocity volVectorField
     Foam::volVectorField * velocity_;
 
-    Foam::pointVectorField *oldPointDisplacement_;
+    // oldPointDisplacement pointVectorField
+    Foam::pointVectorField * oldPointDisplacement_;
     // const pointField& oldPoints;
 
     Foam::tmp<Foam::scalarField> sweptVols(

@@ -73,7 +73,7 @@ void preciceAdapter::FSI::Displacement::read(double * buffer)
             pointDisplacementFluidPatch[i][2] = buffer[bufferIndex++];
         }
 
-        // Info << nl << "Displacement of watchpoint: " << pointDisplacementFluidPatch[160] << endl; //33 for flap_perp., 153
+        Info << nl << "Displacement of watchpoint: " << pointDisplacementFluidPatch[160] << endl; //33 for flap_perp., 153
         // For every cell of the patch
         // Info << nl << "old value pointDisplacement: " << max(pointDisplacement_->oldTime().primitiveField()) << endl;
     }

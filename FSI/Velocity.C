@@ -24,29 +24,55 @@ velocity_(
         &mesh.lookupObject<volVectorField>(nameVelocity)
     )
 )
+// pointDisplacement_(
+//     const_cast<pointVectorField*>
+//     (
+//         &mesh.lookupObject<pointVectorField>("pointDisplacement")
+//     )
+// )
 {
     dataType_ = vector;
+
     // oldpoints = new pointField();
     // CREATE COPY OF THE POINTDISPLACEMENT FIELD?
     // Compare with fvMotionSolver/fvMotionSolvers/displacement/solidBodyDisplacementLaplacian/solidBodyDisplacementLaplacianFvMotionSolver.C
-    oldPointDisplacement_ = new pointVectorField
-    (
-        IOobject
-        (
-            "oldPointDisplacement",
-            runTime_.timeName(),
-            mesh,
-            IOobject::NO_READ,
-            IOobject::NO_WRITE
-        ),
-        mesh,
-        dimensionedVector
-        (
-            "displacement",
-            dimensionSet(0,1,0,0,0,0,0),
-            Foam::vector::zero
-        )
-    );
+    // oldPointDisplacement_ = new pointVectorField //(pointDisplacement_);
+    // (
+    //     IOobject
+    //     (
+    //         "oldPointDisplacement",
+    //         runTime_.timeName(),
+    //         mesh,
+    //         IOobject::NO_READ,
+    //         IOobject::NO_WRITE
+    //     ),
+    //     mesh,
+    //     dimensionedVector
+    //     (
+    //         "displacement",
+    //         dimensionSet(0,1,0,0,0,0,0),
+    //         Foam::vector::zero
+    //     )
+    // );
+    // TODO: Is this ok?
+    // oldPointDisplacement_ = new pointVectorField
+    // (
+    //     IOobject
+    //     (
+    //         "oldPointDisplacement",
+    //         runTime_.timeName(),
+    //         mesh,
+    //         IOobject::NO_READ,
+    //         IOobject::NO_WRITE
+    //     ),
+    //     mesh,
+    //     dimensionedVector
+    //     (
+    //         "displacementDim",
+    //         dimensionSet(0,1,0,0,0,0,0),
+    //         Foam::vector::zero
+    //     )
+    // );
           // dimensionedVector("displacement", dimLength, Zero),
 
 
@@ -106,12 +132,12 @@ Foam::tmp<Foam::scalarField> preciceAdapter::FSI::Velocity::sweptVols
 
     tmp<scalarField> tsweptVols(new scalarField(f.size()));
     scalarField& sweptVols = tsweptVols.ref();
-    Info << "HALLO1" << endl;
+    
     forAll(f, facei)
     {
         sweptVols[facei] = f[facei].sweptVol(oldPoints, newPoints);
+        // Info << "swept volume for patch " << i << " " << sweptVols[facei] << endl;
     }
-    Info << "HALLO2" << endl;
     // Force recalculation of all geometric data with new points
     // clearGeom();
 
@@ -168,12 +194,16 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
         {
             // check if the function needs to be called.
             time_ = runTime_.value();
-            *oldPointDisplacement_ = *pointDisplacement_;
+            // oldPointDisplacement_ = pointDisplacement_;
+
             // save the old point displacement
             // const pointField& oldpoints = pointDisplacement_.oldTime().boundaryField()[patchID].patchInternalField();
-        }
+            
+            // THIS IS A POINTER?
+            const pointVectorField& oldoldPointDisplacement_ = pointDisplacement_.oldTime().oldTime();
+            const pointVectorField& oldPointDisplacement_ = pointDisplacement_.oldTime();
 
-        
+        }      
 
         // const surfaceVectorField::Boundary& n = nf.boundaryField()[patchID];
         // tmp<vectorField> n = nf.boundaryFieldRef()[patchID];
@@ -228,28 +258,37 @@ void preciceAdapter::FSI::Velocity::read(double * buffer)
 
         // Info << nl << "old value: " << max(pointDisplacement_.oldTime().primitiveField()) << endl;
         // const scalarField TpOld(T.oldTime().boundaryField()[patch().index()]);
-        // Info << "Pointfield:  " << pointDisplacement_.boundaryField()[patchID].patchInternalField() << endl;
-        const pointField& newpoints = pointDisplacement_.boundaryField()[patchID].patchInternalField();
-        const pointField& oldpoints = oldPointDisplacement_->boundaryField()[patchID].patchInternalField();
+
+        // DONT DEFINE AS POINTER BUT RATHER AS REAL VALUE
+
+        const pointField newpoints = pointDisplacement_.boundaryField()[patchID].patchInternalField();
+        const pointField oldpoints = pointDisplacement_.oldTime().boundaryField()[patchID].patchInternalField();
+        
         const faceList& f = pp.localFaces();
 
-        Info << "mesh new points " << newpoints[1] << nl << endl;
-        Info << "mesh old points " << oldpoints[1] << nl << endl;
-        //GET THIS PART WORKING
-        // tmp<scalarField> sweptVols = primitiveMesh::movePoints
-        // (
-        //     pointDisplacement_.boundaryFieldRef()[patchID].patchInternalField(),
-        //     pointDisplacement_.oldTime().boundaryFieldRef()[patchID].patchInternalField()
-        // );
+        // Info << "displac at old value1: " <<
+        //     pointDisplacement_.boundaryField()[patchID].patchInternalField() - newpoints
+        //     << nl << endl;
+        // Info << "displac at old value2: " <<  
+        //     pointDisplacement_.oldTime().boundaryField()[patchID].patchInternalField() - oldpoints 
+        //     << nl << endl;
+        
+        // Info << "displac at old value3: " <<  
+        //     newpoints - oldpoints 
+        //     << nl << endl;
 
-/*  
+        // Info << "displac at new old value4: " << newpoints[15] << endl;
+        // Info << "velocity at new old value: " << velocity_->internalField()[15] << endl;
+
+
         tmp<scalarField> tsweptVols = sweptVols
         (
             newpoints,
             oldpoints,
             f
         );
-*/
+
+
         // Info << "sweptVols" << tsweptVols << endl;
 
 
