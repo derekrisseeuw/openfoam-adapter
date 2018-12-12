@@ -748,7 +748,7 @@ void preciceAdapter::Adapter::storeCheckpointTime()
 void preciceAdapter::Adapter::reloadCheckpointTime()
 {
     const_cast<Time&>(runTime_).setTime(couplingIterationTimeValue_, couplingIterationTimeIndex_);
-    // TODO also reset the current iteration?!
+    // TODO For adjustable times the deltaT0 might play a role in the time derivative. Check if this requires updating too. 
     DEBUG(adapterInfo("Reloaded time value t = " + std::to_string(runTime_.value())));
 
     return;
